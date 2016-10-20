@@ -81,6 +81,8 @@ class Lander(pygame.sprite.Sprite):
         self.acceleration = [0,0]
         self.maxacceleration = [2,2]
         self.maxspeed = [4,5]
+        self.rect.left = x
+        self.rect.top = y
 
     def draw(self):
         screen.blit(self.images[self.index],self.rect)
@@ -142,14 +144,42 @@ class Lander(pygame.sprite.Sprite):
         self.checkbounds()
 
 class Terrain(pygame.sprite.Sprite):
-    def __init__(self):
-        
+    def __init__(self,color):
+        self.image = pygame.Surface((width,height))
+        self.rect = self.image.get_rect()
+        self.color = color
+        self.colorkey = -1
+        for i in range(0,width):
+            r = random.randrange(height/4,height/4 + 10)
+            point = pygame.Surface((1,r))
+            point.fill(self.color)
+            ptrect = point.get_rect()
+            ptrect.left = i
+            ptrect.bottom = height
+            self.image.blit(point,ptrect)
+
+        if self.colorkey is -1:
+            self.colorkey = self.image.get_at((0, 0))
+        self.image.set_colorkey(self.colorkey, RLEACCEL)
+
+        self.image = self.image.convert_alpha()
+
+    def draw(self):
+        screen.blit(self.image,self.rect)
+
+class LandingPad(pygame.sprite.Sprite):
+    def __init__(self,multiplier):
+        self.multiplier = multiplier
+
 
 
 def main():
     gameOver = False
 
-    lander = Lander(width/2,height/2)
+    lander = Lander(width/2,0)
+    #lander2 = Lander(width/2,height/2)
+    terrain = Terrain((255,255,255))
+
     while not gameOver:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -174,11 +204,17 @@ def main():
                     lander.acceleration[0] = 0
                 if event.key == pygame.K_RIGHT:
                     lander.acceleration[0] = 0
+
         screen.fill(black)
+        terrain.draw()
+
+        print pygame.sprite.collide_mask(lander,terrain)
 
         lander.draw()
+        #lander2.draw()
 
         lander.update()
+        #lander2.update()
 
         pygame.display.update()
 
