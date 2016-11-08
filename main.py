@@ -345,17 +345,24 @@ def main():
 
             displaytext('Lunar Lander',width/9,width/2,height/3,white)
             displaytext('Press any key to continue....', width / 45, width / 2, height / 2, white)
+            displaytext('Written by : Shivam Shekhar', width/45,width/6,height - height/50,black)
 
-            rnd = random.randrange(0,10)
+            rnd = random.randrange(0,5)
 
             if rnd == 0:
                 introlanderbot.acceleration[1] = introlanderbot.acceleration[1] + (-1)  # -2
-            elif rnd == 1:
-                introlanderbot.acceleration[0] = introlanderbot.acceleration[0] + (0.5)  # -2
-            elif rnd == 2:
-                introlanderbot.acceleration[0] = introlanderbot.acceleration[0] + (-0.5)  # -2
             else:
                 introlanderbot.acceleration = [0,0]
+
+            if introlanderbot.rect.left < width/5:
+                introlanderbot.acceleration[0] = introlanderbot.acceleration[0] + 0.5
+            elif introlanderbot.rect.right > width - width/5:
+                introlanderbot.acceleration[0] = introlanderbot.acceleration[0] - 0.5
+            else:
+                if introlanderbot.movement[0] > 0:
+                    introlanderbot.acceleration[0] = introlanderbot.acceleration[0] + 0.5
+                else:
+                    introlanderbot.acceleration[0] = introlanderbot.acceleration[0] - 0.5
 
             if introlanderbot.rect.top < 0:
                 introlanderbot.rect.top = 0
