@@ -1,22 +1,25 @@
+#Lunar Lander
+#written by : Shivam Shekhar
 import os
 import random
 import pygame
 from pygame.locals import *
+from constants import *
 
 pygame.init()
 
-scr_size = (width, height) = (900, 600)
+#scr_size = (width, height) = (900, 600)
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode(scr_size)
 pygame.display.set_caption('Lunar Lander')
 
-FPS = 25
-black = (0,0,0)
-white = (255,255,255)
-green = (0,255,0)
-red = (255,0,0)
-gravity = 0.3
-air_resistance = 0.05
+#FPS = 25
+#black = (0,0,0)
+#white = (255,255,255)
+#green = (0,255,0)
+#red = (255,0,0)
+#gravity = 0.3
+#air_resistance = 0.05
 
 def load_image(
     name,
@@ -109,16 +112,16 @@ def displayvelocitybar(maxvelocity,limitvelocity,currentvelocity):
     imagerect = image.get_rect()
     imagerect.left = width/90
     imagerect.top = height/60
-    image.fill(white)
+    image.fill(darkgreen)
 
     limitzone = pygame.Surface((barwidth,height/60 * limitvelocity * 2))
-    limitzone.fill(green)
+    limitzone.fill(red)
     limitzonerect = limitzone.get_rect()
     limitzonerect.centery = barheight/2
     image.blit(limitzone,limitzonerect)
 
     currentvelocitybar = pygame.Surface((barwidth,2))
-    currentvelocitybar.fill(red)
+    currentvelocitybar.fill(white)
     currentvelocitybarrect = currentvelocitybar.get_rect()
     currentvelocitybarrect.centery = barheight/2 + currentvelocity*10
     image.blit(currentvelocitybar,currentvelocitybarrect)
@@ -247,13 +250,13 @@ class Explosion(pygame.sprite.Sprite):
 
 
 class Terrain(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,level=1):
         pygame.sprite.Sprite.__init__(self)
         self.scroll = 0
         self.scrollspeed = [3,3]
         self.rightedge = width
         self.bottomedge = height
-        self.fullterrain,self.fullterrainrect = load_image('terrain1 (1).png',int(width),int(height),-1)
+        self.fullterrain,self.fullterrainrect = load_image('terrain_' + str(level) + '.png',int(width),int(height),-1)
         self.fullterrainrect.left = 0
         self.fullterrainrect.top = 0
         self.fullterrainrect.width = width
@@ -311,6 +314,8 @@ def main():
     gameStart = False
     menuDisplay = True
     gameEnd = False
+    levelOver = False
+    gamelevel = 1
 
     explosions = pygame.sprite.Group()
     all = pygame.sprite.RenderUpdates()
@@ -321,7 +326,7 @@ def main():
     introimg,introimgrect = load_image('Intro.png',-1,-1,-1)
     introlanderbot = Lander(width/3,0)
 
-    terrain = Terrain()
+    terrain = Terrain(gamelevel)
 
     while not gameEnd:
         while menuDisplay:
@@ -334,9 +339,12 @@ def main():
                     gameStart = True
                     menuDisplay = False
                     lander = Lander(width / 2, 0)
-                    landingpadx2 = LandingPad(int(0.08 * width), int(0.52 * height), width / 13, height / 40, 2)
-                    landingpadx5 = LandingPad(int(0.69 * width), int(0.93 * height), width / 9, height / 35, 5)
-                    landingpadx10 = LandingPad(int(0.108 * width), int(0.966 * height), width / 12, height / 35, 10)
+                    #landingpadx2 = LandingPad(int(0.08 * width), int(0.52 * height), width / 13, height / 40, 2)
+                    #landingpadx5 = LandingPad(int(0.69 * width), int(0.93 * height), width / 9, height / 35, 5)
+                    #landingpadx10 = LandingPad(int(0.108 * width), int(0.966 * height), width / 12, height / 35, 10)
+                    landingpadx2 = LandingPad(landingpadx2_coordinates[gamelevel-1][0],landingpadx2_coordinates[gamelevel-1][1],landingpadx2_coordinates[gamelevel-1][2],landingpadx2_coordinates[gamelevel][3],2)
+                    landingpadx5 = LandingPad(landingpadx5_coordinates[gamelevel-1][0],landingpadx5_coordinates[gamelevel-1][1],landingpadx5_coordinates[gamelevel-1][2],landingpadx5_coordinates[gamelevel][3],5)
+                    landingpadx10 = LandingPad(landingpadx10_coordinates[gamelevel-1][0],landingpadx10_coordinates[gamelevel-1][1],landingpadx10_coordinates[gamelevel-1][2],landingpadx10_coordinates[gamelevel][3],10)
                     introlanderbot.kill()
 
             screen.fill(black)
@@ -424,6 +432,8 @@ def main():
             landingpadx10.draw()
             displayfuelbar(lander.fuel,lander.maxfuel,width*2/5,height/30)
             displayvelocitybar(lander.maxspeed[1],int(4*lander.maxspeed[1]/7),lander.movement[1])
+            displaytext('FUEL',22,width/3,height/22,white)
+            displaytext('SCORE: ' + str(lander.score),22,width*0.15,height/22,white)
 
             all.draw(screen)
 
@@ -463,6 +473,18 @@ def main():
                 gameEnd = True
                 gameStart = False
 
+            if lander.isLanded == True:
+                lander.isLanded = False
+                lander.rect.left = width/2
+                lander.rect.top = 0
+                gamelevel += 1
+                terrain = Terrain(gamelevel)
+                landingpadx2 = LandingPad(landingpadx2_coordinates[gamelevel-1][0],landingpadx2_coordinates[gamelevel-1][1],landingpadx2_coordinates[gamelevel-1][2],landingpadx2_coordinates[gamelevel][3],2)
+                landingpadx5 = LandingPad(landingpadx5_coordinates[gamelevel-1][0],landingpadx5_coordinates[gamelevel-1][1],landingpadx5_coordinates[gamelevel-1][2],landingpadx5_coordinates[gamelevel][3],5)
+                landingpadx10 = LandingPad(landingpadx10_coordinates[gamelevel-1][0],landingpadx10_coordinates[gamelevel-1][1],landingpadx10_coordinates[gamelevel-1][2],landingpadx10_coordinates[gamelevel][3],10)
+
+
+
 
             all.update()
             terrain.update()
@@ -471,6 +493,18 @@ def main():
 
             #print (lander.fuel, lander.isLanded, lander.movement[1])
             clock.tick(FPS)
+
+        while levelOver:
+
+            #all.draw(screen)
+            #all.update()
+            #terrain.update()
+
+            #pygame.display.update()
+
+            #print (lander.fuel, lander.isLanded, lander.movement[1])
+            #clock.tick(FPS)
+            pass
 
         while gameOver:
             pass
